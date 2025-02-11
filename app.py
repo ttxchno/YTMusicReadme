@@ -10,7 +10,6 @@ client_id = constants.client_id
 client_secret = constants.client_secret
 
 ytmusic = YTMusic('oauth.json', oauth_credentials=OAuthCredentials(client_id=client_id, client_secret=client_secret))
-history = ytmusic.get_history() # Consigo el historial entero
 
 # Ruta de la carpeta donde se guardarán las imágenes SVG generadas
 image_folder = 'static/images'
@@ -21,6 +20,7 @@ if not os.path.exists(image_folder):
 
 @app.route('/')
 def get_latest_watch():
+    history = ytmusic.get_history() # Consigo el historial entero
     last_watched = history[0]
     title = last_watched['title']
     thumbnail_url = last_watched['thumbnails'][0]['url']
