@@ -59,31 +59,22 @@ def get_latest_watch():
     svg_filename = "image.svg"
     svg_path = os.path.join(image_folder, svg_filename)
 
-    # Cálculo del tamaño del texto
+    # Crea el dibujo SVG con un fondo blanco
+    dwg = svgwrite.Drawing(svg_path, profile='tiny', size=(400, 300))
+    dwg.add(dwg.rect(insert=(0, 0), size=("100%", "100%"), fill="white"))
+
+    # Ajusto el texto y lo centro
     wrapped_title = wrap_text(title, constants.max_width, constants.font_size)
     y_position = 30
     for line in wrapped_title:
+        dwg.add(dwg.text(line, insert=(200, y_position), font_size=constants.font_size, fill='black', text_anchor="middle", font_weight="bold"))
         y_position += constants.font_size + 5 # Espacio entre líneas
-
+    dwg.add(dwg.text(artist, insert=(200, y_position), font_size=constants.font_size, fill='black', text_anchor="middle"))
     y_position += constants.font_size + 5 # El texto del artista
 
-    svg_height = y_position + 30
-    dwg = svgwrite.Drawing(svg_path, profile='tiny', size=(constants.svg_width, svg_height))
-    dwg.add(dwg.rect(insert=(0, 0), size=(constants.svg_width, svg_height), fill="white"))
-
-    # Agrego la pesca de los textos (diría que estas medidas van bien)
-    y_position = 30
-    for line in wrapped_title:
-        dwg.add(dwg.text(line, insert=(150, y_position), font_size=constants.font_size, fill='black', font_weight="bold", text_anchor="start"))
-        y_position += constants.font_size + 5
-    dwg.add(dwg.text(artist, insert=(150, y_position), font_size=constants.font_size, fill='black', text_anchor="start"))
-
-    # Altura total del bloque de texto (título + artista)
-    total_text_height = y_position - 30  # Altura total del texto (sin incluir el margen superior)
-    center_y = (total_text_height - constants.image_height) / 2 + 30  # Centrado en el eje Y respecto al bloque de texto
-
-    # Imagen a la izquierda, centrada con respecto al texto
-    dwg.add(dwg.image(f"data:image/png;base64,{base64_image}", insert=(constants.image_x, center_y), size=(100, 100)))
+    # Centro la imagen
+    image_x = (400 - 100) / 2 # 400 es el ancho total del SVG, 100 es el ancho de la imagen
+    dwg.add(dwg.image(f"data:image/png;base64,{base64_image}", insert=(image_x, y_position), size=(100, 100)))
 
     # Guardo el fichero y lo devuelvo
     dwg.save()
