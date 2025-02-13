@@ -27,11 +27,6 @@ def image_to_base64(url):
         return base64.b64encode(response.content).decode('utf-8')
     return None
 
-# Convierte un archivo GIF a base64
-def gif_to_base64(file_path):
-    with open(file_path, "rb") as gif_file:
-        return base64.b64encode(gif_file.read()).decode('utf-8')
-
 # Función para dividir el texto en múltiples líneas si es necesario
 def wrap_text(text, max_width, font_size):
     lines = []
@@ -59,10 +54,6 @@ def get_latest_watch():
     base64_image = image_to_base64(thumbnail_url)
     if base64_image is None:
         return "Error al obtener la imagen", 500
-    base64_gif = gif_to_base64(constants.gif_path)
-
-    if base64_gif is None:
-        return "Error al obtener el GIF", 500
 
     # Creo el archivo
     svg_filename = "image.svg"
@@ -93,7 +84,6 @@ def get_latest_watch():
 
     # Imagen a la izquierda, centrada con respecto al texto
     dwg.add(dwg.image(f"data:image/png;base64,{base64_image}", insert=(constants.image_x, center_y), size=(100, 100)))
-    dwg.add(dwg.image(f"data:image/gif;base64,{base64_gif}", insert=(constants.gif_x, center_y), size=(100, 100)))
 
     # Guardo el fichero y lo devuelvo
     dwg.save()
