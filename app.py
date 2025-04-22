@@ -13,10 +13,9 @@ client_secret = constants.client_secret
 
 ytmusic = YTMusic('oauth.json', oauth_credentials=OAuthCredentials(client_id=client_id, client_secret=client_secret))
 
-# Ruta de la carpeta donde se guardarán las imágenes SVG generadas
-image_folder = 'static/images'
+# Ruta temporal para Vercel
+image_folder = '/tmp'
 
-# Creo la carpeta
 if not os.path.exists(image_folder):
     os.makedirs(image_folder)
 
