@@ -1,5 +1,5 @@
 **A system that will display your most recent played (or currently playing) Youtube Music song in your GitHub profile!**
-<p align="center"> <img src="https://scrawny-eolanda-moguism-b37c14d2.koyeb.app/" alt="Imagen"></p>
+<p align="center"> <img src="https://yt-music-readme.vercel.app/" alt="Imagen"></p>
 <p>The design is not the best in the world, I'm stil working on it xD</p>
 
 ## Setup/Deployment
@@ -30,16 +30,16 @@
 - Edit the **.gitignore**, remove line that says ***.json*** and add ***oauth.json*** to the repo.
 - Save the changes.
 
-#### 4. Hosting on ~~PythonAnywhere~~ Koyeb 🥲
-**I tried hosting it on PythonAnywhere, but for free users it blocks the access to every page that isn't in their whitelist, and Youtube is one of them. *If you now any other free page that works fine, please let me now*.**
-- Create a Koyeb account, go to **Create service** and select **Web Service**.
-- Give it access to the repo you created in step 3, click on **CPU Eco** and select the **Free tier**.
-- Click on **Environment variables and files**
+#### 4. Hosting on ~~PythonAnywhere~~ Vercel✅
+**I tried hosting it on PythonAnywhere, but for free users it blocks the access to every page that isn't in their whitelist, and Youtube is one of them. I also tried Koyeb, Render and Railway, but they didn't convince me. *If you now any other free page that works fine, please let me now*.**
+- Create a Vercel account and select "Add New... > Project"
+- Give it access to the repo you created in step 3.
+- Click on **Environment Variables**
   - Create two environment variables: ```CLIENT_ID``` and ```CLIENT_SECRET```, each one containt their respective info, which you already have.
 - Click on **Deploy**.
 
 AND THAT'S ALL :D<br>
-**Now you can copy the URL from Koyeb and paste it into your GitHub README with a *img* tag**
+**Now you can copy the URL from Vercel and paste it into your GitHub README with a *img* tag**
 
 ## Known issues
 ### The song I'm listening to is not the same as the one shown in Github
@@ -48,7 +48,7 @@ On the one hand, Youtube Music sucks and sometimes doesn't update your history (
 On the other, GitHub needs to upload the image in their own domain before showing the image. In additions, your browser saves cache. Give it time and, after a few reloads, the image will appear (I hope so)😎.
 
 ### Nothing is shown on the Readme, and if I try to access the website, it says *Internal Server Error*
-Go to Koyeb and find the Terminal with logs. Maybe Koyeb failed because it isn't perfect, but **if it says something related to Youtube Authorization, repeat everything from step 2**.
+Go to Vecel and then "Logs". **If it says something related to Youtube Authorization, repeat everything from step 2**.
 
 ## Special thanks to
 - @tthn0 for making something similar for Spotify, which inspired me.
