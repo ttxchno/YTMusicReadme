@@ -53,6 +53,10 @@ Click the image link and then reload GitHub. Vercel issues, idk.
 ### Nothing is shown on the Readme, and if I try to access the website, it says *Internal Server Error*
 Go to Vecel and then "Logs". **If it says something related to Youtube Authorization, repeat everything from step 2**.
 
+## FAQ
+### Why have you decided to include a modified version of YTMusicAPI? (credits below)
+Vercel readonly filesystem seems to have problems with the way the API stores the YT Music token, so I needed to change some things and therefore ship the entire library instead of a reference in "requirements.txt". I already opened a Pull Request to see if my solution can be included in the official package, and if that ends up happening, I will remove the modified library.
+
 ## Special thanks to
 - @tthn0 for making something similar for Spotify, which inspired me.
 - @sigma67 for making the *ytmusicapi* package.

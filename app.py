@@ -3,7 +3,7 @@ import base64
 import requests
 import svgwrite
 from flask import Flask, send_file
-from ytmusicapi import YTMusic, OAuthCredentials
+from ytmusicapi2 import YTMusic, OAuthCredentials
 from src import constants
 
 app = Flask(__name__)
