@@ -5,150 +5,150 @@ import svgwrite
 from flask import Flask, send_file
 from ytmusicapi2 import YTMusic
 
+from constants import (
+    YT_CLIENT_CONFIG,
+    IMAGE_FOLDER, SVG_FILENAME,
+    SVG_WIDTH, SVG_HEIGHT,
+    CARD_MARGIN, CARD_CORNER_RADIUS, CARD_FILL_COLOR, CARD_FILL_OPACITY,
+    IMG_SIZE, IMG_CORNER_RADIUS, IMG_SHADOW_OFFSET, IMG_SHADOW_OPACITY, IMG_THRESHOLD, IMG_Y_POSITION,
+    BG_GRADIENT_ID, BG_GRADIENT_START_COLOR, BG_GRADIENT_END_COLOR, GRADIENT_ANIMATION_DURATION,
+    IMAGE_PULSE_FROM, IMAGE_PULSE_TO, IMAGE_PULSE_DURATION,
+    TITLE_FONT_SIZE, TITLE_FONT_WEIGHT, TITLE_FONT_COLOR, TITLE_FONT_FAMILY,
+    TITLE_MAX_CHARS, TITLE_MAX_LINES, TITLE_LINE_SPACING,
+    ARTIST_FONT_SIZE, ARTIST_FONT_COLOR, ARTIST_FONT_FAMILY, ARTIST_Y_OFFSET
+)
+
 app = Flask(__name__)
+ytmusic = YTMusic(YT_CLIENT_CONFIG)
 
-ytmusic = YTMusic('browser.json')
-image_folder = '/tmp'
-if not os.path.exists(image_folder):
-    os.makedirs(image_folder)
+if not os.path.exists(IMAGE_FOLDER):
+    os.makedirs(IMAGE_FOLDER)
 
-# Convierte la imagen a binario
+
 def image_to_base64(url):
     response = requests.get(url)
     if response.status_code == 200:
         return base64.b64encode(response.content).decode('utf-8')
     return None
 
-# Función para dividir el texto en múltiples líneas si es necesario
-def wrap_text(text, max_chars_per_line=18, max_lines=2):
+
+def wrap_text(text, max_chars_per_line=TITLE_MAX_CHARS, max_lines=TITLE_MAX_LINES):
     words = text.split()
     lines = []
     current_line = ""
 
     for word in words:
-        if len(current_line + " " + word) <= max_chars_per_line:
-            current_line = (current_line + " " + word).strip()
+        candidate = (current_line + " " + word).strip()
+        if len(candidate) <= max_chars_per_line:
+            current_line = candidate
         else:
             lines.append(current_line)
             current_line = word
-        if len(lines) >= max_lines:
-            break
-    lines.append(current_line)
+            if len(lines) >= max_lines:
+                break
 
-    # Si el texto se cortó, añadimos puntos suspensivos
+    if current_line and len(lines) < max_lines:
+        lines.append(current_line)
+
     if len(words) > sum(len(l.split()) for l in lines):
-        if len(lines) > 0:
-            lines[-1] = lines[-1].rstrip(".") + "..."
+        lines[-1] = lines[-1].rstrip('.') + "..."
 
-    return lines[:max_lines]
+    return lines
 
-# FIXME: Las animaciones parecen no funcionar :(
+
 @app.route('/')
 def get_latest_watch():
-    history = ytmusic.get_history() # Consigo el historial entero
-    last_watched = history[0]
+    last_watched = ytmusic.get_history()[0]
     title = last_watched['title']
-    thumbnail_url = last_watched['thumbnails'][0]['url']
-    artists = last_watched.get("artists")[0]['name'] if last_watched.get("artists") else "Desconocido"
+    artists = (last_watched.get("artists") or [{"name": "Desconocido"}])[0]['name'].split(", ")[0]
 
-    # Descargo la imagen y la convierto a base64
+    thumbnail_url = last_watched['thumbnails'][0]['url']
     base64_image = image_to_base64(thumbnail_url)
     if base64_image is None:
         return "Error al obtener la imagen", 500
 
-    svg_filename = "image.svg"
-    svg_path = os.path.join(image_folder, svg_filename)
+    svg_path = os.path.join(IMAGE_FOLDER, SVG_FILENAME)
+    dwg = svgwrite.Drawing(svg_path, profile='full', size=(f"{SVG_WIDTH}px", f"{SVG_HEIGHT}px"))
 
-    width, height = 500, 350
-    dwg = svgwrite.Drawing(svg_path, profile='full', size=(f"{width}px", f"{height}px"))
-
-    # Fondo degradado
-    gradient = dwg.linearGradient(start=(0, 0), end=(1, 1), id="bgGradient")
-    gradient.add_stop_color(0, '#141E30')
-    gradient.add_stop_color(1, '#243B55')
+    # Fondo degradado animado
+    gradient = dwg.linearGradient(start=(0, 0), end=(1, 1), id=BG_GRADIENT_ID)
+    gradient.add_stop_color(0, BG_GRADIENT_START_COLOR)
+    gradient.add_stop_color(1, BG_GRADIENT_END_COLOR)
     dwg.defs.add(gradient)
 
-    animate_grad = svgwrite.animate.AnimateTransform(
+    gradient.add(svgwrite.animate.AnimateTransform(
         transform='translate',
         from_='0,0',
         to='1,1',
-        dur='10s',
+        dur=GRADIENT_ANIMATION_DURATION,
         repeatCount='indefinite'
-    )
-    gradient.add(animate_grad)
-
-    dwg.add(dwg.rect(insert=(0, 0), size=('100%', '100%'), fill="url(#bgGradient)"))
-
-    # Tarjeta central translúcida
-    dwg.add(dwg.rect(
-        insert=(20, 20),
-        size=(width - 40, height - 40),
-        rx=20, ry=20,
-        fill="rgb(255,255,255)",
-        fill_opacity=0.08
     ))
 
-    # Imagen del álbum con recorte redondeado
-    img_size = 120
-    img_x = width / 2 - img_size / 2
-    img_y = 80
+    dwg.add(dwg.rect(insert=(0, 0), size=("100%", "100%"), fill=f"url(#{BG_GRADIENT_ID})"))
+
+    # Tarjeta
+    dwg.add(dwg.rect(
+        insert=(CARD_MARGIN, CARD_MARGIN),
+        size=(SVG_WIDTH - 2 * CARD_MARGIN, SVG_HEIGHT - 2 * CARD_MARGIN),
+        rx=CARD_CORNER_RADIUS, ry=CARD_CORNER_RADIUS,
+        fill=CARD_FILL_COLOR, fill_opacity=CARD_FILL_OPACITY
+    ))
+
+    # Imagen
+    img_x = SVG_WIDTH / 2 - IMG_SIZE / 2
     clip_id = "roundedClip"
     clip_path = dwg.defs.add(dwg.clipPath(id=clip_id))
-    clip_path.add(dwg.rect(insert=(img_x, img_y), size=(img_size, img_size), rx=15, ry=15))
+    clip_path.add(dwg.rect(insert=(img_x, IMG_Y_POSITION), size=(IMG_SIZE, IMG_SIZE), rx=IMG_CORNER_RADIUS, ry=IMG_CORNER_RADIUS))
 
-    # Sombra
     dwg.add(dwg.rect(
-        insert=(img_x - 5, img_y - 5),
-        size=(img_size + 10, img_size + 10),
-        rx=20, ry=20,
-        fill="rgb(0,0,0)",
-        fill_opacity=0.3
+        insert=(img_x - IMG_SHADOW_OFFSET, IMG_Y_POSITION - IMG_SHADOW_OFFSET),
+        size=(IMG_SIZE + 2 * IMG_SHADOW_OFFSET, IMG_SIZE + 2 * IMG_SHADOW_OFFSET),
+        rx=IMG_CORNER_RADIUS, ry=IMG_CORNER_RADIUS,
+        fill="black", fill_opacity=IMG_SHADOW_OPACITY
     ))
 
     image_element = dwg.image(
         f"data:image/png;base64,{base64_image}",
-        insert=(img_x, img_y),
-        size=(img_size, img_size),
+        insert=(img_x, IMG_Y_POSITION),
+        size=(IMG_SIZE, IMG_SIZE),
         clip_path=f"url(#{clip_id})"
     )
 
-    pulse_anim = svgwrite.animate.AnimateTransform(
+    image_element.add(svgwrite.animate.AnimateTransform(
         transform='scale',
-        from_='1',
-        to='1.05',
-        dur='3s',
+        from_=IMAGE_PULSE_FROM,
+        to=IMAGE_PULSE_TO,
+        dur=IMAGE_PULSE_DURATION,
         repeatCount='indefinite',
         additive='sum',
         fill='freeze'
-    )
-    image_element.add(pulse_anim)
+    ))
+
     dwg.add(image_element)
 
     # Título
-    wrapped_title = wrap_text(title, max_chars_per_line=20, max_lines=2)
-    y_position = img_y + img_size + 40
-    for line in wrapped_title:
+    y = IMG_Y_POSITION + IMG_SIZE + IMG_THRESHOLD
+    for line in wrap_text(title):
         dwg.add(dwg.text(
             line,
-            insert=(width / 2, y_position),
+            insert=(SVG_WIDTH / 2, y),
             text_anchor="middle",
-            fill='white',
-            font_size="22px",
-            font_weight="bold",
-            font_family="sans-serif"
+            fill=TITLE_FONT_COLOR,
+            font_size=TITLE_FONT_SIZE,
+            font_weight=TITLE_FONT_WEIGHT,
+            font_family=TITLE_FONT_FAMILY
         ))
-        y_position += 26
+        y += TITLE_LINE_SPACING
 
     # Artista
     dwg.add(dwg.text(
         artists,
-        insert=(width / 2, y_position + 10),
+        insert=(SVG_WIDTH / 2, y + ARTIST_Y_OFFSET),
         text_anchor="middle",
-        fill='#CCCCCC',
-        font_size="16px",
-        font_family="sans-serif"
+        fill=ARTIST_FONT_COLOR,
+        font_size=ARTIST_FONT_SIZE,
+        font_family=ARTIST_FONT_FAMILY
     ))
 
-    # Guardo el fichero y lo devuelvo
     dwg.save()
     return send_file(svg_path, mimetype='image/svg+xml')
