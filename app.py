@@ -161,5 +161,8 @@ import os
 def now_playing():
     image_path = os.path.join("static", "images", "now-playing.png")
     if os.path.exists(image_path):
-        return send_file(image_path, mimetype="image/png")
+        buffer = BytesIO()
+card.save(buffer, format="PNG")
+buffer.seek(0)
+return send_file(buffer, mimetype='image/png')
     return abort(404)
