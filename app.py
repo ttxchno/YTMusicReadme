@@ -156,11 +156,3 @@ from flask import send_file
 
 from flask import send_file, abort
 import os
-
-@app.route("/api/now-playing")
-def now_playing():
-    svg_path = os.path.join(IMAGE_FOLDER, SVG_FILENAME)
-    if os.path.exists(svg_path):
-        return send_file(svg_path, mimetype="image/svg+xml")
-    return abort(404)
-
