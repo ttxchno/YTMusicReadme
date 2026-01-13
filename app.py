@@ -62,11 +62,7 @@ def get_latest_watch():
     title = last_watched['title']
     artists = (last_watched.get("artists") or [{"name": "Desconocido"}])[0]['name'].split(", ")[0]
 
-   thumbnail_url = last_watched['thumbnails'][0]['url']
-if '=' in thumbnail_url:
-    thumbnail_url = thumbnail_url.split('=')[0] + "=s800"
-else:
-    thumbnail_url += "=s800"
+    thumbnail_url = last_watched['thumbnails'][0]['url']
     base64_image = image_to_base64(thumbnail_url)
     if base64_image is None:
         return "Error al obtener la imagen", 500
@@ -155,7 +151,7 @@ else:
     ))
 
     dwg.save()
-    return send_file(svg_path, mimetype='image/svg+xml')
+    return send_file(png_path, mimetype='image/png')
 from flask import send_file
 
 from flask import send_file, abort
