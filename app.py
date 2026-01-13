@@ -156,3 +156,10 @@ from flask import send_file
 
 from flask import send_file, abort
 import os
+
+@app.route("/api/now-playing")
+def now_playing():
+    image_path = os.path.join("static", "images", "now-playing.png")
+    if os.path.exists(image_path):
+        return send_file(image_path, mimetype="image/png")
+    return abort(404)
