@@ -26,16 +26,10 @@ if not os.path.exists(IMAGE_FOLDER):
 
 
 def image_to_base64(url):
-    # Upgrade to high-res thumbnail if needed
-    if "=s" in url:
-        url = url.split('=')[0] + "=s800"
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
+    response = requests.get(url)
+    if response.status_code == 200:
         return base64.b64encode(response.content).decode('utf-8')
-    except Exception as e:
-        print(f"Image fetch failed: {e}")
-        return None
+    return None
 
 
 def wrap_text(text, max_chars_per_line=TITLE_MAX_CHARS, max_lines=TITLE_MAX_LINES):
@@ -69,9 +63,6 @@ def get_latest_watch():
     artists = (last_watched.get("artists") or [{"name": "Desconocido"}])[0]['name'].split(", ")[0]
 
     thumbnail_url = last_watched['thumbnails'][0]['url']
-    if "=s" in thumbnail_url:
-    thumbnail_url = thumbnail_url.split('=')[0] + "=s800"
-
     base64_image = image_to_base64(thumbnail_url)
     if base64_image is None:
         return "Error al obtener la imagen", 500
