@@ -154,6 +154,12 @@ def get_latest_watch():
     return send_file(svg_path, mimetype='image/svg+xml')
 from flask import send_file
 
+from flask import send_file, abort
+import os
+
 @app.route("/api/now-playing")
 def now_playing():
-    return send_file("static/images/now-playing.png", mimetype="image/png")
+    image_path = os.path.join("static", "images", "now-playing.png")
+    if os.path.exists(image_path):
+        return send_file(image_path, mimetype="image/png")
+    return abort(404)
