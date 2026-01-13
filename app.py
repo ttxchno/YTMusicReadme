@@ -26,10 +26,16 @@ if not os.path.exists(IMAGE_FOLDER):
 
 
 def image_to_base64(url):
-    response = requests.get(url)
-    if response.status_code == 200:
+    # Upgrade to high-res thumbnail if needed
+    if "=s" in url:
+        url = url.split('=')[0] + "=s800"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
         return base64.b64encode(response.content).decode('utf-8')
-    return None
+    except Exception as e:
+        print(f"Image fetch failed: {e}")
+        return None
 
 
 def wrap_text(text, max_chars_per_line=TITLE_MAX_CHARS, max_lines=TITLE_MAX_LINES):
