@@ -62,7 +62,7 @@ def get_latest_watch():
     title = last_watched['title']
     artists = (last_watched.get("artists") or [{"name": "Desconocido"}])[0]['name'].split(", ")[0]
 
-    thumbnail_url = last_watched['thumbnails'][0]['url']
+   thumbnail_url = last_watched['thumbnails'][0]['url'].split('=')[0] + "=s800"
     base64_image = image_to_base64(thumbnail_url)
     if base64_image is None:
         return "Error al obtener la imagen", 500
